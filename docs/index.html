@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Paper Assistant</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f7fafc; margin:0; display:flex; align-items:center; justify-content:center; height:100vh }
+    .container { background:#fff; padding:24px; border-radius:10px; box-shadow:0 8px 30px rgba(16,24,40,0.08); width:min(760px,95%); }
+    h1 { margin:0 0 12px; font-size:20px }
+    .form-row { display:flex; gap:12px; align-items:center; margin:12px 0 }
+    label { min-width:120px; color:#111827 }
+    select { flex:1; padding:8px 10px; border-radius:8px; border:1px solid #e5e7eb; background:#fff }
+    button { margin-top:12px; padding:10px 14px; border-radius:8px; border:none; background:#2563eb; color:#fff; cursor:pointer }
+    .result { margin-top:12px; padding:10px; background:#f1f5f9; border-radius:8px; color:#0f172a }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>论文写作辅助 — 选择专业与目标期刊</h1>
+
+    <div class="form-row">
+      <label for="discipline">专业：</label>
+      <select id="discipline" aria-label="专业选择">
+        <option value="">—— 请选择专业 ——</option>
+        <option value="教育学">教育学</option>
+        <option value="语文">语文</option>
+        <option value="数学">数学</option>
+        <option value="英语">英语</option>
+        <option value="物理">物理</option>
+        <option value="化学">化学</option>
+        <option value="计算机科学">计算机科学</option>
+        <option value="生物学">生物学</option>
+        <option value="经济学">经济学</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label for="journal">目标期刊：</label>
+      <select id="journal" aria-label="目标期刊选择">
+        <option value="">—— 请选择目标期刊 ——</option>
+        <option value="知网收录">知网收录</option>
+        <option value="省级正规普刊">省级正规普刊</option>
+        <option value="国家级正规普刊">国家级正规普刊</option>
+        <option value="学术专著出版">学术专著出版</option>
+        <option value="北大核心/南大核心期刊">北大核心/南大核心期刊</option>
+        <option value="SSCI国际核心期刊">SSCI国际核心期刊</option>
+      </select>
+    </div>
+
+    <button id="saveBtn">保存选择</button>
+
+    <div id="result" class="result" hidden></div>
+  </div>
+
+  <script>
+    const discipline = document.getElementById('discipline');
+    const journal = document.getElementById('journal');
+    const saveBtn = document.getElementById('saveBtn');
+    const result = document.getElementById('result');
+
+    function load() {
+      const d = localStorage.getItem('paper_assistant_discipline');
+      const j = localStorage.getItem('paper_assistant_journal');
+      if (d) discipline.value = d;
+      if (j) journal.value = j;
+      if (d || j) showResult();
+    }
+
+    function showResult() {
+      const d = discipline.value || '（未选择）';
+      const j = journal.value || '（未选择）';
+      result.hidden = false;
+      result.textContent = `已选择 — 专业：${d}；目标期刊：${j}`;
+    }
+
+    saveBtn.addEventListener('click', () => {
+      localStorage.setItem('paper_assistant_discipline', discipline.value);
+      localStorage.setItem('paper_assistant_journal', journal.value);
+      showResult();
+    });
+
+    load();
+  </script>
+</body>
+</html>

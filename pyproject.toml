@@ -8,12 +8,15 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "google-genai>=2.8.0",
     "pydantic-settings>=2.14.1",
     "structlog>=26.1.0",
+    "tiktoken>=0.13.0",
 ]
 
 [project.scripts]
 paper-assistant = "paper_assistant:main"
+paper_assistant = "paper_assistant:main"
 
 [build-system]
 requires = ["uv_build>=0.11.15,<0.12.0"]

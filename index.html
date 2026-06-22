@@ -1,86 +1,403 @@
+<!-- index.html -->
 <!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Paper Assistant</title>
   <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f7fafc; margin:0; display:flex; align-items:center; justify-content:center; height:100vh }
-    .container { background:#fff; padding:24px; border-radius:10px; box-shadow:0 8px 30px rgba(16,24,40,0.08); width:min(760px,95%); }
-    h1 { margin:0 0 12px; font-size:20px }
-    .form-row { display:flex; gap:12px; align-items:center; margin:12px 0 }
-    label { min-width:120px; color:#111827 }
-    select { flex:1; padding:8px 10px; border-radius:8px; border:1px solid #e5e7eb; background:#fff }
-    button { margin-top:12px; padding:10px 14px; border-radius:8px; border:none; background:#2563eb; color:#fff; cursor:pointer }
-    .result { margin-top:12px; padding:10px; background:#f1f5f9; border-radius:8px; color:#0f172a }
+    body { margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f3f4f6; color: #111827; }
+    .page { display: grid; grid-template-columns: 320px 1fr 280px; gap: 20px; padding: 24px; box-sizing: border-box; }
+    .sidebar, .editor { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 24px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06); }
+    .sidebar { display: flex; flex-direction: column; gap: 18px; }
+    .editor { display: flex; flex-direction: column; gap: 18px; }
+    h1, h2 { margin: 0; font-size: 22px; }
+    .field { display: flex; flex-direction: column; gap: 10px; }
+    label { font-size: 14px; font-weight: 600; }
+    select, input, textarea { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid #d1d5db; background: #f8fafc; font-size: 14px; outline: none; }
+    textarea { min-height: 120px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    button { width: 100%; padding: 14px 16px; border: none; border-radius: 14px; background: #2563eb; color: #ffffff; font-size: 15px; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    #status { min-height: 48px; padding: 14px 16px; border-radius: 14px; border: 1px solid transparent; background: #f8fafc; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+    .downloads { display: flex; gap: 12px; flex-wrap: wrap; }
+    .downloads button { width: auto; padding: 12px 18px; background: #0f766e; }
+    .hidden { display: none; }
+    .module-buttons { display: flex; flex-direction: column; gap: 8px; }
+    .module-buttons button { width: 100%; text-align: left; padding: 12px 14px; background: #eef2ff; color: #1e3a8a; border: 1px solid #c7d2fe; }
+    .module-buttons button.active { background: #4338ca; color: #ffffff; }
+    .active-module { min-height: 48px; padding: 12px 14px; border-radius: 14px; border: 1px solid #d1d5db; background: #ffffff; }
+    .editor-actions { display: flex; justify-content: flex-end; }
+    .module-hint { font-size: 13px; color: #4b5563; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>论文写作辅助 — 选择专业与目标期刊</h1>
-
-    <div class="form-row">
-      <label for="discipline">专业：</label>
-      <select id="discipline" aria-label="专业选择">
-        <option value="">—— 请选择专业 ——</option>
-        <option value="教育学">教育学</option>
-        <option value="语文">语文</option>
-        <option value="数学">数学</option>
-        <option value="英语">英语</option>
-        <option value="物理">物理</option>
-        <option value="化学">化学</option>
-        <option value="计算机科学">计算机科学</option>
-        <option value="生物学">生物学</option>
-        <option value="经济学">经济学</option>
-      </select>
+  <div class="page">
+    <div class="sidebar left">
+      <h1>论文写作助手</h1>
+      <div class="field">
+        <label for="discipline">专业</label>
+        <select id="discipline" aria-label="专业选择">
+          <option value="">—— 请选择专业 ——</option>
+          <option value="教育学">教育学</option>
+          <option value="语文">语文</option>
+          <option value="数学">数学</option>
+          <option value="英语">英语</option>
+          <option value="物理">物理</option>
+          <option value="化学">化学</option>
+          <option value="计算机科学">计算机科学</option>
+          <option value="生物学">生物学</option>
+          <option value="经济学">经济学</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="journalLevel">期刊级别</label>
+        <select id="journalLevel" aria-label="期刊级别选择">
+          <option value="">—— 请选择期刊级别 ——</option>
+          <option value="知网收录">知网收录</option>
+          <option value="省级正规普刊">省级正规普刊</option>
+          <option value="国家级正规普刊">国家级正规普刊</option>
+          <option value="学术专著出版">学术专著出版</option>
+          <option value="北大核心/南大核心期刊">北大核心/南大核心期刊</option>
+          <option value="SSCI国际核心期刊">SSCI国际核心期刊</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="journalTemplate">目标期刊</label>
+        <select id="journalTemplate" aria-label="目标期刊选择">
+          <option value="">—— 请选择目标期刊 ——</option>
+          <option value="通用科技期刊">通用科技期刊</option>
+        </select>
+      </div>
+      <button id="convertBtn">确定选择</button>
+      <div id="status" class="hidden"></div>
     </div>
 
-    <div class="form-row">
-      <label for="journal">目标期刊：</label>
-      <select id="journal" aria-label="目标期刊选择">
-        <option value="">—— 请选择目标期刊 ——</option>
-        <option value="知网收录">知网收录</option>
-        <option value="省级正规普刊">省级正规普刊</option>
-        <option value="国家级正规普刊">国家级正规普刊</option>
-        <option value="学术专著出版">学术专著出版</option>
-        <option value="北大核心/南大核心期刊">北大核心/南大核心期刊</option>
-        <option value="SSCI国际核心期刊">SSCI国际核心期刊</option>
-      </select>
+    <div class="editor">
+      <h2>模块编辑区</h2>
+      <div class="field">
+        <label>当前模块</label>
+        <div id="activeModuleLabel" class="active-module">请先选择一个模块</div>
+      </div>
+      <textarea id="moduleContent" placeholder="点击右侧模块按钮选择一个模块进行编辑。" rows="12"></textarea>
+      <div class="editor-actions">
+        <button id="saveModuleBtn">保存当前模块</button>
+        <button id="rewriteBtn" style="margin-left:12px; background:#0f5132;">改写为学术风格</button>
+      </div>
+      <div class="downloads hidden" id="downloadButtons">
+        <button id="downloadDocx">下载 DOCX</button>
+        <button id="downloadPdf">下载 PDF</button>
+      </div>
     </div>
 
-    <button id="saveBtn">保存选择</button>
+    <div class="sidebar right">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2>论文模块</h2>
 
-    <div id="result" class="result" hidden></div>
+        <button
+            id="addModuleBtn"
+            style="
+                width:auto;
+                padding:8px 12px;
+                font-size:13px;
+                background:#059669;
+            "
+        >
+            添加模块
+        </button>
+    </div>
+      <div class="module-buttons hidden" id="moduleButtons"></div>
+      <div class="module-hint">每个模块只需点击按钮切换，编辑后点击“保存当前模块”。</div>
+    </div>
   </div>
 
   <script>
     const discipline = document.getElementById('discipline');
-    const journal = document.getElementById('journal');
-    const saveBtn = document.getElementById('saveBtn');
-    const result = document.getElementById('result');
+    const journalLevel = document.getElementById('journalLevel');
+    const journalTemplate = document.getElementById('journalTemplate');
+    const convertBtn = document.getElementById('convertBtn');
+    const status = document.getElementById('status');
+    const moduleButtons = document.getElementById('moduleButtons');
+    const downloadButtons = document.getElementById('downloadButtons');
+    const downloadDocx = document.getElementById('downloadDocx');
+    const downloadPdf = document.getElementById('downloadPdf');
+    const activeModuleLabel = document.getElementById('activeModuleLabel');
+    const moduleContent = document.getElementById('moduleContent');
+    const saveModuleBtn = document.getElementById('saveModuleBtn');
+    const addModuleBtn = document.getElementById('addModuleBtn');
 
-    function load() {
-      const d = localStorage.getItem('paper_assistant_discipline');
-      const j = localStorage.getItem('paper_assistant_journal');
-      if (d) discipline.value = d;
-      if (j) journal.value = j;
-      if (d || j) showResult();
+    let savedModuleContents = {};
+    let sectionOrder = [];
+    let currentModule = '';
+
+    const defaultModules = [
+      '题名',
+      '作者署名',
+      '作者单位全称',
+      '摘要',
+      '引言',
+      '方法',
+      '结果',
+      '参考文献',
+    ];
+
+    function setStatus(message, isError = false) {
+      status.classList.remove('hidden');
+      status.textContent = message;
+      status.style.color = isError ? '#b91c1c' : '#0f5132';
+      status.style.background = isError ? '#f8d7da' : '#d1e7dd';
+      status.style.border = isError ? '1px solid #f5c2c7' : '1px solid #badbcc';
     }
 
-    function showResult() {
-      const d = discipline.value || '（未选择）';
-      const j = journal.value || '（未选择）';
-      result.hidden = false;
-      result.textContent = `已选择 — 专业：${d}；目标期刊：${j}`;
+    function clearStatus() {
+      status.classList.add('hidden');
+      status.textContent = '';
     }
 
-    saveBtn.addEventListener('click', () => {
-      localStorage.setItem('paper_assistant_discipline', discipline.value);
-      localStorage.setItem('paper_assistant_journal', journal.value);
-      showResult();
-    });
+    function saveModuleContent() {
+      if (!currentModule) {
+        setStatus('请先选择一个模块再保存。', true);
+        return;
+      }
+      savedModuleContents[currentModule] = moduleContent.value;
+      setStatus(`已保存“${currentModule}”内容。`, false);
+    }
 
-    load();
+    function renderSectionButtons(modules) {
+      moduleButtons.innerHTML = '';
+      moduleButtons.classList.remove('hidden');
+      sectionOrder = modules.slice();
+      modules.forEach((name) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = name;
+        btn.addEventListener('click', () => switchModule(name, btn));
+        moduleButtons.appendChild(btn);
+      });
+      if (moduleButtons.firstChild) {
+        switchModule(modules[0], moduleButtons.firstChild);
+      }
+    }
+
+    function saveCurrentModuleBeforeAction() {
+      if (currentModule) {
+        savedModuleContents[currentModule] = moduleContent.value;
+      }
+    }
+
+    function switchModule(name, button) {
+      currentModule = name;
+      Array.from(moduleButtons.children).forEach((btn) => btn.classList.remove('active'));
+      button.classList.add('active');
+      activeModuleLabel.textContent = name;
+      moduleContent.value = savedModuleContents[name] || '';
+      clearStatus();
+    }
+
+    function updateDownloadLinks(downloadId) {
+      downloadButtons.classList.remove('hidden');
+      downloadDocx.onclick = () => window.open(`/download/${downloadId}/docx`, '_blank');
+      downloadPdf.onclick = () => window.open(`/download/${downloadId}/pdf`, '_blank');
+    }
+
+    function collectFormValues() {
+      return savedModuleContents;
+    }
+
+    async function handleConvert() {
+      clearStatus();
+      downloadButtons.classList.add('hidden');
+
+      if (!journalTemplate.value) {
+        setStatus('请选择目标期刊。', true);
+        return;
+      }
+
+      saveCurrentModuleBeforeAction();
+      const formData = new FormData();
+      formData.append('discipline', discipline.value);
+      formData.append('journal_level', journalLevel.value);
+      formData.append('journal_template', journalTemplate.value);
+      const collected = collectFormValues();
+      Object.entries(collected).forEach(([key, value]) => formData.append(key, value));
+      console.log("FORM DATA");
+      for (const pair of formData.entries()) {
+          console.log(pair[0], pair[1]);
+      }
+      setStatus('正在生成，请稍候...', false);
+      convertBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/convert', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          let msg = "请求失败";
+
+          if (Array.isArray(data.detail)) {
+            msg = data.detail.map(e => `${e.loc?.join(".")}: ${e.msg}`).join("\n");
+          } else {
+            msg = data.detail || msg;
+          }
+
+          setStatus(msg, true);
+          return;
+        }
+
+        savedModuleContents = data.sections || {};
+        const modules = data.section_order && data.section_order.length ? data.section_order : defaultModules;
+        renderSectionButtons(modules);
+        switchModule(modules[0], moduleButtons.firstChild);
+        updateDownloadLinks(data.download_id);
+        clearStatus();
+      } catch (error) {
+        setStatus('生成过程中出现异常，请稍后重试。', true);
+      } finally {
+        convertBtn.disabled = false;
+      }
+    }
+
+    saveModuleBtn.addEventListener('click', saveModuleContent);
+    const rewriteBtn = document.getElementById('rewriteBtn');
+
+    async function handleRewrite() {
+      clearStatus();
+      if (!currentModule) {
+        setStatus('请先选择一个模块再进行改写。', true);
+        return;
+      }
+      if (!journalTemplate.value) {
+        setStatus('请选择目标期刊以加载对应模板。', true);
+        return;
+      }
+      rewriteBtn.disabled = true;
+      try {
+        const formData = new FormData();
+        formData.append('journal_template', journalTemplate.value);
+        formData.append('module_name', currentModule);
+        formData.append('content', moduleContent.value || '');
+        setStatus('正在改写为学术风格，请稍候...', false);
+        const resp = await fetch('/api/rewrite', { method: 'POST', body: formData });
+        const data = await resp.json();
+        if (!resp.ok) {
+          let msg = "请求失败";
+
+          if (Array.isArray(data.detail)) {
+            msg = data.detail.map(e => `${e.loc?.join(".")}: ${e.msg}`).join("\n");
+          } else {
+            msg = data.detail || msg;
+          }
+
+          setStatus(msg, true);
+          return;
+        }
+        moduleContent.value = data.rewritten || '';
+        savedModuleContents[currentModule] = moduleContent.value;
+        setStatus('改写完成，已更新当前模块内容。', false);
+      } catch (err) {
+        setStatus('改写过程中发生异常，请稍后重试。', true);
+      } finally {
+        rewriteBtn.disabled = false;
+      }
+    }
+    convertBtn.addEventListener('click', handleConvert);
+    rewriteBtn.addEventListener('click', handleRewrite);
+    renderSectionButtons(defaultModules);
+
+    async function handleAddModule() {
+
+        const moduleName = prompt("请输入新的论文模块名称");
+
+        if (!moduleName) {
+            return;
+        }
+
+        if (savedModuleContents[moduleName]) {
+            setStatus("该模块已存在", true);
+            return;
+        }
+
+        addModuleBtn.disabled = true;
+
+        try {
+
+            setStatus("正在生成模块说明...", false);
+
+            const formData = new FormData();
+
+            formData.append(
+                "discipline",
+                discipline.value || "教育学"
+            );
+
+            formData.append(
+                "module_name",
+                moduleName
+            );
+
+            const response = await fetch(
+                "/api/add_module",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setStatus(
+                    data.detail || "生成失败",
+                    true
+                );
+                return;
+            }
+
+            savedModuleContents[moduleName] =
+                data.content || "";
+
+            sectionOrder.push(moduleName);
+
+            renderSectionButtons(sectionOrder);
+
+            const buttons =
+                Array.from(moduleButtons.children);
+
+            const newBtn =
+                buttons.find(
+                    btn => btn.textContent === moduleName
+                );
+
+            if (newBtn) {
+                switchModule(
+                    moduleName,
+                    newBtn
+                );
+            }
+
+            setStatus(
+                `模块【${moduleName}】已添加`,
+                false
+            );
+
+        } catch (err) {
+
+            setStatus(
+                "添加模块失败",
+                true
+            );
+
+        } finally {
+
+            addModuleBtn.disabled = false;
+
+        }
+    }
+    addModuleBtn.addEventListener(
+        'click',
+        handleAddModule
+    );
   </script>
 </body>
 </html>

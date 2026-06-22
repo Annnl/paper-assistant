@@ -12,6 +12,13 @@ dependencies = [
     "pydantic-settings>=2.14.1",
     "structlog>=26.1.0",
     "tiktoken>=0.13.0",
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.23.0",
+    "python-multipart>=0.0.6",
+    "python-docx>=0.8.12",
+    "PyPDF2>=3.0.0",
+    "reportlab>=3.6.0",
+    "pypandoc>=1.10.0",
 ]
 
 [project.scripts]
